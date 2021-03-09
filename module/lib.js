@@ -159,6 +159,37 @@ export const linkData = function(expanded, flattened, key, value) {
   flattened[key] = value;
 };
 
+export const skillLevel = function(ranks) {
+    if(ranks < 2) return "";
+    else if (ranks < 5) return "E";
+    else if (ranks < 9) return "D";
+    else if (ranks < 14) return "C";
+    else if (ranks < 20) return "B";
+    else return "A"
+};
+
+export const skillMod = {
+  fromRanks(ranks) {
+    if(ranks < 2) return 0;
+    else if (ranks < 5) return 3;
+    else if (ranks < 9) return 6;
+    else if (ranks < 14) return 9;
+    else if (ranks < 20) return 12;
+    else return 15
+  },
+
+  fromLevel(level) {
+    switch(level) {
+      case "E": 3; break;
+      case "D": 6; break;
+      case "C": 9; break;
+      case "B": 12; break;
+      case "A": 15; break;
+      default: 0;
+    }
+  }
+};
+
 export const getItemOwner = function(item) {
   if (item.actor) return item.actor;
   if (item._id) {

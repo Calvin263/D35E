@@ -42,12 +42,12 @@
                 {{#each skill.subSkills as |subSkill b|}}
                 <li class="skill flexrow" data-skill="{{s}}.{{b}}">
                     <span  data-class-skillid="{{s}}">{{skill.label}} - {{subSkill.name}}{{#if skill.rt}}■{{/if}}</span>
-                    <a class="item-control" title="Remove Skill Point" onclick="addRemoveSkill('skills.{{s}}.subSkills.{{b}}.rank',-1,{{subSkill.cs}})">
+                    <a class="item-control" title="Remove Skill Point" onclick="addRemoveSkill('skills.{{s}}.subSkills.{{b}}.rank','skills.{{s}}.subSkills.{{b}}.combinedRank',-1,{{subSkill.cs}})">
                         <i class="fas fa-minus remove-skill"></i>
                     </a>
                     <input type="text" class="skill-value" name="skills.{{s}}.subSkills.{{b}}.rank" value="{{subSkill.rank}}" readonly style="border: none" placeholder="0"/>
                     <input type="hidden" class="skill-class" data-class-skillid="{{s}}" value="{{subSkill.cs}}" readonly placeholder="0"/>
-                    <a class="item-control" title="Add Skill Point" onclick="addRemoveSkill('skills.{{s}}.subSkills.{{b}}.rank',1,{{subSkill.cs}})">
+                    <a class="item-control" title="Add Skill Point" onclick="addRemoveSkill('skills.{{s}}.subSkills.{{b}}.rank','skills.{{s}}.subSkills.{{b}}.combinedRank',1,{{subSkill.cs}})">
                         <i class="fas fa-plus add-skill"></i>
                     </a>
 
@@ -59,23 +59,38 @@
                 {{/each}}
             {{else}}
             <li class="skill flexrow" data-skill="{{s}}">
+                <div class="skill-row">
+                    <div class="skill-row-left">
+                        {{#if skill.custom}}
+                        <span data-class-skillid="{{s}}">{{skill.name}}{{#if skill.rt}}■{{/if}}</span>
+                        {{else}}
+                        <span data-class-skillid="{{s}}">{{skill.label}}{{#if skill.rt}}■{{/if}}</span>
+                        {{/if}}
+                    </div>
+                    <div class="skill-row-right">
+                        <a class="item-control" title="Remove Skill Point" onclick="addRemoveSkill('skills.{{s}}.rank','skills.{{s}}.combinedRank',-1,{{skill.cs}})">
+                            <i class="fas fa-minus remove-skill"></i>
+                        </a>
+                        <input type="text" class="skill-value" name="skills.{{s}}.rank" style="border: none" value="{{skill.rank}}" readonly placeholder="0"/>
+                        <input type="hidden" class="skill-class" data-class-skillid="{{s}}" value="{{skill.cs}}" readonly placeholder="0"/>
+                        <a class="item-control" title="Add Skill Point" onclick="addRemoveSkill('skills.{{s}}.rank','skills.{{s}}.combinedRank',1,{{skill.cs}})">
+                            <i class="fas fa-plus add-skill"></i>
+                        </a>
 
-                {{#if skill.custom}}
-                <span data-class-skillid="{{s}}">{{skill.name}}{{#if skill.rt}}■{{/if}}</span>
-                {{else}}
-                <span data-class-skillid="{{s}}">{{skill.label}}{{#if skill.rt}}■{{/if}}</span>
-                {{/if}}
-                <a class="item-control" title="Remove Skill Point" onclick="addRemoveSkill('skills.{{s}}.rank',-1,{{skill.cs}})">
-                    <i class="fas fa-minus remove-skill"></i>
-                </a>
-                <input type="text" class="skill-value" name="skills.{{s}}.rank" style="border: none" value="{{skill.rank}}" readonly placeholder="0"/>
-                <input type="hidden" class="skill-class" data-class-skillid="{{s}}" value="{{skill.cs}}" readonly placeholder="0"/>
-                <a class="item-control" title="Add Skill Point" onclick="addRemoveSkill('skills.{{s}}.rank',1,{{skill.cs}})">
-                    <i class="fas fa-plus add-skill"></i>
-                </a>
-
-                <input type="hidden" class="original-skill-value" value="{{skill.baseRank}}" readonly placeholder="0" style="flex: 0 25px"/>
-                <input type="text" class="combined-skill-value" value="{{skill.baseRank}}" disabled placeholder="0" style="border: none; flex: 0 25px"/>
+                        <input type="hidden" class="original-skill-value" value="{{skill.baseRank}}" readonly placeholder="0" style="flex: 0 25px"/>
+                        <input type="text" class="combined-skill-value" name="skills.{{s}}.combinedRank" value="{{skill.baseRank}}" disabled placeholder="0" style="border: none; flex: 0 25px"/>
+                    </div>
+                </div>
+                <!-- NEW Level & Progression -->
+                <div class="skill-row-2">
+                    <div class="flewrow skill-level">
+                        <label class="skill-level-label">{{skill.level}}</label>
+                    </div>
+                    <div class="flewrow">
+                        <label class="skill-progression-label">{{skill.progression}}</label>
+                    </div>
+                </div>
+                <!-- END NEW -->
             </li>
             {{/if}}
             {{/each}}
@@ -136,14 +151,59 @@
                     $(this).find('.remove-skill').parent().css('cursor','pointer');
                 }
 
-                $(this).find('.add-skill').css('opacity',0.8);
-                $(this).find('.add-skill').parent().css('cursor','pointer');
+                let newVal = baseRank + val;
+                if (newVal >= 20) {
+                    $(this).find('.add-skill').css('opacity',0.2);
+                    $(this).find('.add-skill').parent().css('cursor','default');
+                } else {
+                    $(this).find('.add-skill').css('opacity',0.8);
+                    $(this).find('.add-skill').parent().css('cursor','pointer');
+                }
+                
                 $(this).find('.combined-skill-value').val(baseRank + val*(skillClass ? 1.0 : 0.5))
-                if (baseRank + val > {{totalLevel}} + 3) {
+                
+                if (newVal > {{totalLevel}} + 3) {
                     $(this).find('.combined-skill-value').css('color','darkred')
                 } else {
                     $(this).find('.combined-skill-value').css('color','black')
                 }
+
+                let NCL = baseRank + val*(skillClass ? 1.0 : 0.5);
+                // NEW
+                let newLevel = '';
+                if(NCL < 2) { newLevel = '' } 
+                else if(NCL < 5) { newLevel = 'E' } 
+                else if(NCL < 9) { newLevel = 'D' }
+                else if(NCL < 14) { newLevel = 'C' } 
+                else if(NCL < 20) { newLevel = 'B' }
+                else newLevel = 'A'
+
+                let newProgression = '';
+                if (NCL < 1) { newProgression = '◻' }
+                else if(NCL < 2) { newProgression = '◼' } 
+                else if(NCL < 3) { newProgression = '◻◻' } 
+                else if(NCL < 4) { newProgression = '◼◻' }
+                else if(NCL < 5) { newProgression = '◼◼' }
+                else if(NCL < 6) { newProgression = '◻◻◻' }
+                else if(NCL < 7) { newProgression = '◼◻◻' }
+                else if(NCL < 8) { newProgression = '◼◼◻' }
+                else if(NCL < 9) { newProgression = '◼◼◼' }
+                else if(NCL < 10) { newProgression = '◻◻◻◻' }
+                else if(NCL < 11) { newProgression = '◼◻◻◻' }
+                else if(NCL < 12) { newProgression = '◼◼◻◻' }
+                else if(NCL < 13) { newProgression = '◼◼◼◻' }
+                else if(NCL < 14) { newProgression = '◼◼◼◼' }
+                else if(NCL < 15) { newProgression = '◻◻◻◻◻' }
+                else if(NCL < 16) { newProgression = '◼◻◻◻◻' }
+                else if(NCL < 17) { newProgression = '◼◼◻◻◻' }
+                else if(NCL < 18) { newProgression = '◼◼◼◻◻' }
+                else if(NCL < 19) { newProgression = '◼◼◼◼◻' }
+                else if(NCL < 20) { newProgression = '◼◼◼◼◼' }
+                else if(NCL < 21) { newProgression = '' }
+
+                $(this).find('.skill-level-label').text(newLevel);
+                $(this).find('.skill-progression-label').text(newProgression);
+                // END NEW
             });
 
             if (usedSkillpoints > spl) {
@@ -165,11 +225,14 @@
             $('#class-hd').text(`${hd}`)
         }
 
-        function addRemoveSkill(id, value, classSkill) {
+        function addRemoveSkill(id, combinedId, value, classSkill) {
             let usedSkillpoints = parseInt($('#usedSkillpoints').val() || 0)
             let spl = parseInt($('#spl').val() || 0)
             if (usedSkillpoints + value < 0) return;
             if (parseInt($(`input[name='${id}']`).val() || 0) + value < 0) return;
+            // NEW
+            if (parseInt($(`input[name='${combinedId}']`).val() || 0) + value > 20) return;
+            // END NEW
             $(`input[name='${id}']`).val(parseInt($(`input[name='${id}']`).val() || 0) + value)
             usedSkillpoints+=value;
             $('#usedSkillpoints').val(usedSkillpoints)

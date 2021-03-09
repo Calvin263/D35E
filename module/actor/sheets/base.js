@@ -969,7 +969,7 @@ export class ActorSheetPF extends ActorSheet {
       event: event,
       parts: ["@concentrationBonus + @formulaBonus"],
       data: {
-        concentrationBonus: this.actor.data.data.skills["coc"].mod, // This is standard concentration skill
+        concentrationBonus: this.actor.data.data.skills["end"].mod, // This is standard concentration skill
         formulaBonus: formulaRoll.total
       },
       title: game.i18n.localize("D35E.ConcentrationCheck"),
@@ -1730,7 +1730,7 @@ export class ActorSheetPF extends ActorSheet {
         isSpellLike: a === "spelllike",
         orig: spellbook,
         canCreate: this.actor.owner === true,
-        concentration: this.actor.data.data.skills["coc"].mod,
+        concentration: this.actor.data.data.skills["end"].mod,
         spellcastingTypeName: spellbook.spellcastingType !== undefined && spellbook.spellcastingType !== null ? game.i18n.localize(CONFIG.D35E.spellcastingType[spellbook.spellcastingType]) : "None"
       };
 

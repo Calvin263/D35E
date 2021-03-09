@@ -43,6 +43,31 @@ D35E.abilityCost = {
   "18": 17,
 };
 
+D35E.skillRanks = {
+  "": "◻",
+  "0": "◻",
+  "1": "◼",
+  "2": "◻◻",
+  "3": "◼◻",
+  "4": "◼◼",
+  "5": "◻◻◻",
+  "6": "◼◻◻",
+  "7": "◼◼◻",
+  "8": "◼◼◼",
+  "9": "◻◻◻◻◻",
+  "10": "◼◻◻◻",
+  "11": "◼◼◻◻",
+  "12": "◼◼◼◻",
+  "13": "◼◼◼◼",
+  "14": "◻◻◻◻◻",
+  "15": "◼◻◻◻◻",
+  "16": "◼◼◻◻◻",
+  "17": "◼◼◼◻◻",
+  "18": "◼◼◼◼◻",
+  "19": "◼◼◼◼◼",
+  "20": ""
+}
+
 
 /**
  * The set of Saving Throws
@@ -714,6 +739,7 @@ D35E.senses = {
  * @type {Object}
  */
 D35E.skills = {
+  /*
   "apr": "D35E.SkillApr",
   "blc": "D35E.SkillBlc",
   "blf": "D35E.SkillBlf",
@@ -762,6 +788,24 @@ D35E.skills = {
   "aut": "D35E.SkillAut",
   "psi": "D35E.SkillPsi",
   "upd": "D35E.SkillUPD"
+  */
+  "ath": "D35E.SkillAth",
+  "acr": "D35E.SkillAcr",
+  "end": "D35E.SkillEnd",
+  "kna": "D35E.SkillKnA",
+  "knh": "D35E.SkillKnH",
+  "knn": "D35E.SkillKnN",
+  "kno": "D35E.SkillKnO",
+  "knr": "D35E.SkillKnR",
+  "ins": "D35E.SkillIns",
+  "per": "D35E.SkillPer",
+  "sur": "D35E.SkillSur",
+  "dec": "D35E.SkillDec",
+  "int": "D35E.SkillInt",
+  "prs": "D35E.SkillPrs",
+  "ste": "D35E.SkillSte",
+  "thi": "D35E.SkillThi"
+
 };
 
 D35E.arbitrarySkills = [

@@ -1482,6 +1482,17 @@
   border-radius: 3px;
   height: 24px;
 }
+.D35E.sheet.actor ul.skills-list li.skill .skill-progression {
+  font-size: 1.3em;
+  letter-spacing: -3px;
+  min-width: 3em;
+}
+.D35E.sheet.actor ul.skills-list li.skill .skill-level {
+  font-size: 1.2em;
+  font-weight: bold;
+  max-width: 1em;
+  padding-left: 0.2em;
+}
 .D35E.sheet.actor ul.skills-list li.skill .skill-mod-total .image-d20,
 .D35E.sheet.actor ul.skills-list li.sub-skill .skill-mod-total .image-d20 {
   margin-top: 1px;
@@ -4613,6 +4624,26 @@ tr.introjs-showElement > th {
     opacity: 0;
   }
 }
+.level-up-data ul.skills-list li.skill.flexrow div.skill-row {
+  display: flex;
+  min-width: 100%;
+}
+.level-up-data ul.skills-list li.skill.flexrow div.skill-row div.skill-row-right
+{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.level-up-data ul.skills-list li.skill.flexrow div.skill-row-2 {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0px;
+}
+.level-up-data ul.skills-list li.skill.flexrow div.skill-row-2 .skill-level {
+  margin-right: 5px;
+  font-weight: bold;
+}
 .level-up-data .header {
   background: url(ui/parchment.jpg) repeat;
   background-position-y: bottom;
@@ -4685,6 +4716,11 @@ tr.introjs-showElement > th {
   text-align: center;
   font-size: 13px;
 }
+.level-up-data ul.skills-list {
+  display: block;
+  column-count: 4;
+  column-rule: 1px double black;
+}
 .level-up-data .skill {
   flex: 0 203px;
   padding: 5px;
@@ -4692,7 +4728,7 @@ tr.introjs-showElement > th {
 .level-up-data .skill:nth-of-type(4n-1),
 .level-up-data .skill:nth-of-type(4n-2),
 .level-up-data .skill:nth-of-type(4n-3) {
-  border-right: rgba(0, 0, 0, 0.4) 1px solid;
+  display: inline-block;
 }
 .level-up-data .skill .item-control {
   flex: 0 16px;

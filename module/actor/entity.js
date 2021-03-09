@@ -1,6 +1,6 @@
 import { DicePF } from "../dice.js";
 import { ItemPF } from "../item/entity.js";
-import { createTag, linkData, isMinimumCoreVersion } from "../lib.js";
+import { createTag, linkData, isMinimumCoreVersion, skillMod, skillLevel } from "../lib.js";
 import { createCustomChatMessage } from "../chat.js";
 import { _getInitiativeFormula } from "../combat.js";
 import { CACHE } from "../cache.js";
@@ -497,7 +497,8 @@ export class ActorPF extends Actor {
             }
 
             case "knowSkills": {
-                let knowledgeSkills = new Set(['kna','kno','kpl','kre','klo','khi','kge','ken','kdu','kar','kps'])
+                let knowledgeSkills = new Set(['kna','knh','knn','kno','kbr'])
+                //d35ee let knowledgeSkills = new Set(['kna','kno','kpl','kre','klo','khi','kge','ken','kdu','kar','kps'])
                 for (let [a, skl] of Object.entries(curData.skills)) {
                     if (skl == null) continue;
                     if (knowledgeSkills.has(a))
@@ -1146,6 +1147,7 @@ export class ActorPF extends Actor {
             });
         }
 
+        /* SKILL SYNERGIES
         //Bluff
         if (data.data.skills.blf.rank >= 5) {
             changes.push({
@@ -1245,6 +1247,7 @@ export class ActorPF extends Actor {
                 source: { name: "Skill synergy" }
             });
         }
+        */
 
         // Apply level drain to hit points
         if (!Number.isNaN(data.data.attributes.energyDrain) && data.data.attributes.energyDrain > 0) {
@@ -2610,8 +2613,21 @@ export class ActorPF extends Actor {
             let cs = skl.cs;
             if (data1.details.levelUpData && data1.details.levelUpProgression)
                 cs = true;
-            let sklValue = (Math.floor((cs && skl.rank > 0 ? skl.rank : (skl.rank / 2)) + ablMod + specificSkillBonus - acpPenalty - energyDrainPenalty));
+            //SKILL RANKS
+            // NEW
+            let sklRank = Math.floor((cs && skl.rank > 0 ? skl.rank : (skl.rank / 2)));
+            let sklRankBonus = skillMod.fromRanks(sklRank);
+            let sklValue = (sklRankBonus + ablMod + specificSkillBonus - acpPenalty - energyDrainPenalty);
+            // END NEW
+            //D35E OG: let sklValue = (Math.floor((cs && skl.rank > 0 ? skl.rank : (skl.rank / 2)) + ablMod + specificSkillBonus - acpPenalty - energyDrainPenalty));
             linkData(data, updateData, `data.skills.${sklKey}.mod`, sklValue);
+            // NEW
+            let prog = CONFIG.D35E.skillRanks[sklRank];
+            let level = skillLevel(sklRank);
+            linkData(data, updateData, `data.skills.${sklKey}.progression`, prog);
+            linkData(data, updateData, `data.skills.${sklKey}.level`, level);
+            linkData(data, updateData, `data.skills.${sklKey}.sklRankBonus`, sklRankBonus);
+            // END NEW
             // Parse sub-skills
             for (let [subSklKey, subSkl] of Object.entries(skl.subSkills || {})) {
                 if (subSkl == null) continue;
@@ -2626,9 +2642,21 @@ export class ActorPF extends Actor {
                 if (subSkl.ability !== "")
                     ablMod = data1.abilities[subSkl.ability].mod;
                 specificSkillBonus = subSkl.changeBonus || 0;
-                sklValue = subSkl.rank + (scs && subSkl.rank > 0 ? skl.rank : (skl.rank / 2)) + ablMod + specificSkillBonus - acpPenalty - energyDrainPenalty;
+                // NEW
+                let subSklRank = (scs && subSkl.rank > 0 ? skl.rank : (skl.rank / 2));
+                let subSklRankBonus = skillMod.fromRanks(subSklRank);
+                sklValue = (subSklRankBonus + ablMod + specificSkillBonus - acpPenalty - energyDrainPenalty);
+                // END NEW
+                //D35E OG: sklValue = subSkl.rank + (scs && subSkl.rank > 0 ? skl.rank : (skl.rank / 2)) + ablMod + specificSkillBonus - acpPenalty - energyDrainPenalty;
                 linkData(data, updateData, `data.skills.${sklKey}.subSkills.${subSklKey}.mod`, sklValue);
-            }
+                // NEW
+                prog = CONFIG.D35E.skillRanks[subSklRank];
+                level = skillLevel(subSklRank);
+                linkData(data, updateData, `data.skills.${sklKey}.subProgression`, prog);
+                linkData(data, updateData, `data.skills.${sklKey}.subLevel`, level);
+                linkData(data, updateData, `data.skills.${sklKey}.sklRankBonus`, subSklRankBonus);
+                // END NEW
+                }
         }
     }
 

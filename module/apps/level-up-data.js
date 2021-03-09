@@ -37,6 +37,10 @@ export class LevelUpDataDialog extends FormApplication {
                 baseRank: this.options.skillset.all.skills[s].rank - (this.levelUpData.skills[s] !== undefined ? (this.levelUpData.skills[s].cls ? this.levelUpData.skills[s].rank : this.levelUpData.skills[s].rank/2) : 0),
                 rt: this.options.skillset.all.skills[s].rt,
                 cs: this.options.skillset.all.skills[s].cs,
+                // NEW  Level & Progression
+                level: this.options.skillset.all.skills[s].level,
+                progression: this.options.skillset.all.skills[s].progression,
+                // END NEW
                 subSkills: {}
             }
 
@@ -50,6 +54,10 @@ export class LevelUpDataDialog extends FormApplication {
                     baseRank: this.options.skillset.all.skills[s].subSkills[sb].rank - ((this.levelUpData.skills[s] !== undefined && this.levelUpData.skills[s].subskills[sb] !== undefined) ? (this.levelUpData.skills[s].subskills[sb].cls ? this.levelUpData.skills[s].subskills[sb].rank : this.levelUpData.skills[s].subskills[sb].rank/2) : 0),
                     rt: this.options.skillset.all.skills[s].rt,
                     cs: this.options.skillset.all.skills[s].cs,
+                    // NEW  Level & Progression
+                    level: this.options.skillset.all.skills[s].subSkills[sb].level,
+                    progression: this.options.skillset.all.skills[s].subSkills[sb].progression
+                    // END NEW
                 }
             })
         })
