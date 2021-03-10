@@ -1966,7 +1966,7 @@ export class ActorPF extends Actor {
 
             console.log('D35E | ActorPF | Will update actor level')
             while (levelUpData.length < data1.details.level.available) {
-                levelUpData.push({ 'level': levelUpData.length + 1, 'id': '_' + Math.random().toString(36).substr(2, 9), 'classId': null, 'class': null, 'classImage': null, 'skills': {}, 'hp': 0, hasFeat: (levelUpData.length + 1) % 3 === 0, hasAbility: (levelUpData.length + 1) % 4 === 0 })
+                levelUpData.push({ 'level': levelUpData.length + 1, 'id': '_' + Math.random().toString(36).substr(2, 9), 'classId': null, 'class': null, 'classImage': null, 'skills': {}, 'weaponSkills': {}, 'hp': 0, hasFeat: (levelUpData.length + 1) % 3 === 0, hasAbility: (levelUpData.length + 1) % 4 === 0 })
             }
             while (levelUpData.length > data1.details.level.available) {
                 levelUpData.pop();
@@ -2600,6 +2600,7 @@ export class ActorPF extends Actor {
         let energyDrainPenalty = Math.abs(data1.attributes.energyDrain);
         for (let [sklKey, skl] of Object.entries(data1.skills)) {
             if (skl == null) continue;
+            if (skl.value == null) continue;
 
             let acpPenalty = (skl.acp ? Math.max(updateData["data.attributes.acp.gear"], updateData["data.attributes.acp.encumbrance"]) : 0);
             if (sklKey === "swm")
@@ -2657,6 +2658,31 @@ export class ActorPF extends Actor {
                 linkData(data, updateData, `data.skills.${sklKey}.sklRankBonus`, subSklRankBonus);
                 // END NEW
                 }
+        }
+
+        for (let [sklKey, skl] of Object.entries(data1.weaponSkills)) {
+            if (skl == null) continue;
+
+            // Parse main skills
+            let cs = skl.cs;
+            if (data1.details.levelUpData && data1.details.levelUpProgression)
+                cs = true;
+            let specificSkillBonus = skl.changeBonus || 0;
+            //SKILL RANKS
+            // NEW
+            let sklRank = Math.floor((cs && skl.rank > 0 ? skl.rank : (skl.rank / 2)));
+            let sklRankBonus = skillMod.fromRanks(sklRank);
+            let sklValue = (sklRankBonus + specificSkillBonus - energyDrainPenalty);
+            // END NEW
+            //D35E OG: let sklValue = (Math.floor((cs && skl.rank > 0 ? skl.rank : (skl.rank / 2)) + ablMod + specificSkillBonus - acpPenalty - energyDrainPenalty));
+            linkData(data, updateData, `data.weaponSkills.${sklKey}.mod`, sklValue);
+            // NEW
+            let prog = CONFIG.D35E.skillRanks[sklRank];
+            let level = skillLevel(sklRank);
+            linkData(data, updateData, `data.weaponSkills.${sklKey}.progression`, prog);
+            linkData(data, updateData, `data.weaponSkills.${sklKey}.level`, level);
+            linkData(data, updateData, `data.weaponSkills.${sklKey}.sklRankBonus`, sklRankBonus);
+            // END NEW
         }
     }
 
@@ -2741,6 +2767,7 @@ export class ActorPF extends Actor {
                 fc: {
                     hp: classType === "base" ? cls.data.fc.hp.value : 0,
                     skill: classType === "base" ? cls.data.fc.skill.value : 0,
+                    weaponskill: classType === "base" ? cls.data.fc.weaponSkill.value : 0,
                     alt: classType === "base" ? cls.data.fc.alt.value : 0,
                 },
             };
@@ -3087,6 +3114,14 @@ export class ActorPF extends Actor {
                     }
                 }
             }
+
+            for (let [sklKey, skl] of Object.entries(actorData.data.weaponSkills)) {
+                if (sourceDetails[`data.weaponSkills.${sklKey}.changeBonus`] == null) continue;
+                sourceDetails[`data.weaponSkills.${sklKey}.changeBonus`].push({
+                    name: "Negative Levels",
+                    value: -actorData.data.attributes.energyDrain
+                });
+            }
         }
 
         // AC from Dex mod
@@ -3342,6 +3377,12 @@ export class ActorPF extends Actor {
                         expandedData.data.skills[s] = null;
                     }
                 }
+            }
+            console.log(expandedData.data)
+            for (let [s, skl] of Object.entries(expandedData.data.weaponSkills)) {
+                if (skl == null) continue;
+                if (skl.rank)
+                    if (typeof skl.rank !== "number") skl.rank = 0;
             }
             data = flattenObject(expandedData);
         } else if (expandedData.data !== null)
@@ -3633,6 +3674,9 @@ export class ActorPF extends Actor {
                         updateData[`data.skills.${s}.subSkills.${sb}.rank`] = Math.floor(updateData[`data.skills.${s}.subSkills.${sb}.rank`] || 0);
                     })
                 }
+            })
+            Object.keys(levelUpData[0]?.weaponSkills || {}).forEach(s => {
+                updateData[`data.weaponSkills.${s}.rank`] = Math.floor(updateData[`data.weaponSkills.${s}.rank`] || 0);
             })
 
             for (var _class of classes) {
@@ -4021,7 +4065,7 @@ export class ActorPF extends Actor {
     rollSkill(skillId, options = {}) {
         if (!this.hasPerm(game.user, "OWNER")) return ui.notifications.warn(game.i18n.localize("D35E.ErrorNoActorPermission"));
 
-        let skl, sklName;
+        let skl, sklName, isWeaponSkill;
         const skillParts = skillId.split("."),
             isSubSkill = skillParts[1] === "subSkills" && skillParts.length === 3;
         if (isSubSkill) {
@@ -4030,14 +4074,23 @@ export class ActorPF extends Actor {
             sklName = `${CONFIG.D35E.skills[skillId]} (${skl.name})`;
         } else {
             skl = this.data.data.skills[skillId];
-            if (skl.name != null) sklName = skl.name;
+            if(skl === undefined) {
+                skl = this.data.data.weaponSkills[skillId];
+                sklName = `${CONFIG.D35E.weaponSkills[skillId]}`;
+                isWeaponSkill = true;
+            } else if (skl.name != null) sklName = skl.name;
             else sklName = CONFIG.D35E.skills[skillId];
         }
 
         // Add contextual attack string
         let notes = [];
         const rollData = duplicate(this.data.data);
-        const noteObjects = this.getContextNotes(`skill.${isSubSkill ? skillParts[2] : skillId}`);
+        let noteObjects;
+        if(isWeaponSkill) {
+            noteObjects = this.getContextNotes(`weaponSkill.${skillId}`);
+        } else {
+            noteObjects = this.getContextNotes(`skill.${isSubSkill ? skillParts[2] : skillId}`);
+        }
         for (let noteObj of noteObjects) {
             rollData.item = {};
             if (noteObj.item != null) rollData.item = duplicate(new ItemPF(noteObj.item.data, { owner: this.owner }));

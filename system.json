@@ -4,7 +4,7 @@
   "description": "Fork of Rughalt's D35E 0.90.1. For custom Edgemaster system.",
   "version": "0.90.1",
   "author": "Calvin",
-  "templateVersion": 4,
+  "templateVersion": 8,
   "scripts": [],
   "esmodules": ["D35E.js"],
   "styles": ["D35E.css"],

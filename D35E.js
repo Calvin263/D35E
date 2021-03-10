@@ -83,7 +83,7 @@ Hooks.once("init", async function() {
 
   // Record Configuration Values
   CONFIG.D35E = D35E;
-  CONFIG.debug.hooks = true;
+  CONFIG.debug.hooks = false;
   CONFIG.Actor.entityClass = ActorPF;
   CONFIG.Item.entityClass = ItemPF;
   CONFIG.ui.compendium = CompendiumDirectoryPF;
@@ -132,7 +132,7 @@ Hooks.once("init", async function() {
 Hooks.once("setup", function() {
   // Localize CONFIG objects once up-front
   const toLocalize = [
-    "abilities", "abilitiesShort", "alignments", "currencies", "distanceUnits", "itemActionTypes", "senses", "skills", "targetTypes",
+    "abilities", "abilitiesShort", "alignments", "currencies", "distanceUnits", "itemActionTypes", "senses", "skills", "weaponSkills", "targetTypes",
     "timePeriods", "savingThrows", "ac", "acValueLabels", "featTypes", "conditions", "lootTypes", "flyManeuverabilities",
     "spellPreparationModes", "weaponTypes", "weaponProperties", "spellComponents", "spellSchools", "spellLevels", "conditionTypes",
     "favouredClassBonuses", "armorProficiencies", "weaponProficiencies", "actorSizes", "actorTokenSizes", "abilityActivationTypes", "abilityActivationTypesPlurals",

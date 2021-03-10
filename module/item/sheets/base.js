@@ -560,6 +560,27 @@ export class ItemSheetPF extends ItemSheet {
                     return cur;
                 }, {});
             }
+
+            // Add weapon skill list
+            if (!this.item.actor) {
+                data.weaponSkills = Object.entries(CONFIG.D35E.weaponSkills).reduce((cur, o) => {
+                    cur[o[0]] = {
+                        name: o[1],
+                        classSkill: getProperty(this.item.data, `data.classWeaponSkills.${o[0]}`) === true
+                    };
+                    return cur;
+                }, {});
+            } else {
+                data.weaponSkills = Object.entries(this.item.actor.data.data.weaponSkills).reduce((cur, o) => {
+                    const key = o[0];
+                    const name = CONFIG.D35E.weaponSkills[key] != null ? CONFIG.D35E.weaponSkills[key] : o[1].name;
+                    cur[o[0]] = {
+                        name: name,
+                        classSkill: getProperty(this.item.data, `data.classWeaponSkills.${o[0]}`) === true
+                    };
+                    return cur;
+                }, {});
+            }
         }
 
         // Prepare stuff for items with changes

@@ -10,10 +10,10 @@
             <div class="form-group spellcasting-class tooltip flexrow">
                 <label><span>{{localize "D35E.Class"}}</span></label>
                 <select name="class" id="class-select" data-dtype="String" onchange="selectedClassData(this)">
-                    <option data-hd="0" data-skill="0" value="">{{localize "D35E.SelectClass"}}</option>
+                    <option data-hd="0" data-skill="0" data-weaponskill="0" value="">{{localize "D35E.SelectClass"}}</option>
                     {{#select levelUpData.classId}}
                     {{#each classes as |cls a|}}
-                    <option data-hd="{{cls.data.hd}}" data-skill="{{cls.data.skillsPerLevel}}" value="{{cls._id}}">{{cls.name}}</option>
+                    <option data-hd="{{cls.data.hd}}" data-skill="{{cls.data.skillsPerLevel}}" data-weaponskill="{{cls.data.weaponskillsPerLevel}}" value="{{cls._id}}">{{cls.name}}</option>
                     {{/each}}
                     {{/select}}
                 </select>
@@ -58,7 +58,7 @@
 
                 {{/each}}
             {{else}}
-            <li class="skill flexrow" data-skill="{{s}}">
+            <li class="skill flexrow skillCount" data-skill="{{s}}">
                 <div class="skill-row">
                     <div class="skill-row-left">
                         {{#if skill.custom}}
@@ -97,9 +97,56 @@
             </ul>
         </div>
     </div>
+
+    <!-- NEW -->
+    <h2 class="block-header">{{localize "D35E.WeaponSkills"}}</h2>
+    <p>{{{localize "D35E.LUDWeaponSkillsDesc"}}} </p>
+    <p>{{localize "D35E.LUDSkillRank"}} <strong>{{maxWeaponSkillRank}}</strong> ({{localize "D35E._Level"}} {{totalLevel}} + 3)</p>
+    {{{localize "D35E.LUDWeaponSkillPointsAtLevel"}}}
+    <div class="flexrow">
+        <div class="flexcol">
+            <ul class="skills-list sub-scroll scroll-skillset flexrow" style="padding: 0">
+            {{#each weaponSkillset as |skill s|}}
+            <li class="skill flexrow weaponskillCount" data-weaponskill="{{s}}">
+                <div class="skill-row">
+                    <div class="skill-row-left">
+                        <span data-class-skillid="{{s}}">{{skill.label}}{{#if skill.rt}}■{{/if}}</span>
+                    </div>
+                    <div class="skill-row-right">
+                        <a class="item-control" title="Remove Skill Point" onclick="addRemoveWeaponSkill('weaponSkill.{{s}}.rank','weaponSkill.{{s}}.combinedRank',-1,{{skill.cs}})">
+                            <i class="fas fa-minus remove-skill"></i>
+                        </a>
+                        <input type="text" class="skill-value" name="weaponSkill.{{s}}.rank" style="border: none" value="{{skill.rank}}" readonly placeholder="0"/>
+                        <input type="hidden" class="skill-class" data-class-skillid="{{s}}" value="{{skill.cs}}" readonly placeholder="0"/>
+                        <a class="item-control" title="Add Skill Point" onclick="addRemoveWeaponSkill('weaponSkill.{{s}}.rank','weaponSkill.{{s}}.combinedRank',1,{{skill.cs}})">
+                            <i class="fas fa-plus add-skill"></i>
+                        </a>
+
+                        <input type="hidden" class="original-skill-value" value="{{skill.baseRank}}" readonly placeholder="0" style="flex: 0 25px"/>
+                        <input type="text" class="combined-skill-value" name="weaponSkill.{{s}}.combinedRank" value="{{skill.baseRank}}" disabled placeholder="0" style="border: none; flex: 0 25px"/>
+                    </div>
+                </div>
+                <div class="skill-row-2">
+                    <div class="flewrow skill-level">
+                        <label class="skill-level-label">{{skill.level}}</label>
+                    </div>
+                    <div class="flewrow">
+                        <label class="skill-progression-label">{{skill.progression}}</label>
+                    </div>
+                </div>
+            </li>
+            {{/each}}
+            </ul>
+        </div>
+    </div>
+    <!-- END NEW-->
+
     <input type="hidden" id="spl">
     <input type="hidden" id="spl-base">
+    <input type="hidden" id="wspl">
+    <input type="hidden" id="wspl-base">
     <input type="hidden" id="usedSkillpoints">
+    <input type="hidden" id="usedWeaponSkillpoints">
     <input type="hidden" id="hd">
   <button type="submit" name="submit" value="1"><i class="far fa-save"></i> {{localize "D35E.SetLevelData"}}</button>
 
@@ -107,37 +154,56 @@
         function selectedClassData(select, force = false) {
             var hd = parseInt($('option:selected', select).attr('data-hd'));
             var skills = parseInt($('option:selected', select).attr('data-skill'));
+            var weaponSkills = parseInt($('option:selected', select).attr('data-weaponskill'));
             $('#spl-base').val(skills)
+            $('#wspl-base').val(weaponSkills)
             $('#hd').val(hd)
             let classId = $('option:selected', select).val();
             let intSkills = {{actor.data.abilities.int.mod}};
             let bonusSkillPoints = '{{bonusSkillPoints}}';
             skills += intSkills
             skills += parseInt(bonusSkillPoints)
+            weaponSkills += parseInt(bonusSkillPoints)
             skills = Math.max(1,skills)
+            weaponSkills = Math.max(1,weaponSkills)
             let classes = JSON.parse('{{{classesJson}}}')
             let classSkills = classes.find(_c => _c.id === classId).classSkills;
-            console.log(classSkills)
+            let weaponClasses = JSON.parse('{{{weaponClassesJson}}}')
+            let classWeaponSkills = weaponClasses.find(_c => _c.id === classId).classWeaponSkills;
             for (let key of Object.keys(classSkills)) {
                 $(`input[data-class-skillid='${key}'`).val(classSkills[key])
                 $(`span[data-class-skillid='${key}'`).toggleClass("bold", classSkills[key])
             }
+            for (let key of Object.keys(classWeaponSkills)) {
+                $(`input[data-class-skillid='${key}'`).val(classWeaponSkills[key])
+                $(`span[data-class-skillid='${key}'`).toggleClass("bold", classWeaponSkills[key])
+            }
             let level = {{level}};
             let isCharacter = '{{actor.type}}' === "character";
-            if (level === 1 && isCharacter)
+            if (level === 1 && isCharacter) {
                 skills = skills * 4
+                weaponSkills = weaponSkills * 4
+            }
 
             $('#spl').val(skills)
+            $('#wspl').val(weaponSkills)
+            
             if (!force) $('#usedSkillpoints').val(0)
+            if (!force) $('#usedWeaponSkillpoints').val(0)
             if (!force) $('.skill-value').val(0)
+            if (!force) $('.weaponskill-value').val(0)
             if (!force) rollHP();
+            
             updateFormData()
         }
 
         function updateFormData() {
             let usedSkillpoints = parseInt($('#usedSkillpoints').val() || 0)
+            let usedWeaponSkillpoints = parseInt($('#usedWeaponSkillpoints').val() || 0)
             let spl = parseInt($('#spl').val() || 0)
             let splBase = parseInt($('#spl-base').val() || 0)
+            let wspl = parseInt($('#wspl').val() || 0)
+            let wsplBase = parseInt($('#wspl-base').val() || 0)
             let hd = parseInt($('#hd').val() || 0)
             $('.skill').each(function( index ) {
                 let val = parseInt($(this).find('.skill-value').val() || 0)
@@ -211,17 +277,28 @@
             } else {
                 $('#skill-used').css('color','black')
             }
+            if (usedWeaponSkillpoints > wspl) {
+                $('#weaponskill-used').css('color','darkred')
+            } else {
+                $('#weaponskill-used').css('color','black')
+            }
             let intSkills = '{{actor.data.abilities.int.mod}}';
             let bonusSkillPoints = '{{bonusSkillPoints}}';
             let level = {{level}};
             if (level === 1) {
                 $('#flb').text(', {{localize "D35E.FirstLevelMultiplier"}}')
+                $('#flb2').text(', {{localize "D35E.FirstLevelMultiplier"}}')
             }
             $('#skill-per-level-base').text(splBase)
             $('#skill-per-level-int').text(intSkills)
             $('#skill-per-level-bonus').text(bonusSkillPoints)
             $('#skill-per-level').text(spl)
             $('#skill-used').text(`${usedSkillpoints} / ${spl}`)
+            $('#weaponskill-per-level-base').text(wsplBase)
+            $('#weaponskill-per-level-int').text(intSkills)
+            $('#weaponskill-per-level-bonus').text(bonusSkillPoints)
+            $('#weaponskill-per-level').text(wspl)
+            $('#weaponskill-used').text(`${usedWeaponSkillpoints} / ${wspl}`)
             $('#class-hd').text(`${hd}`)
         }
 
@@ -236,6 +313,20 @@
             $(`input[name='${id}']`).val(parseInt($(`input[name='${id}']`).val() || 0) + value)
             usedSkillpoints+=value;
             $('#usedSkillpoints').val(usedSkillpoints)
+            updateFormData();
+        }
+
+        function addRemoveWeaponSkill(id, combinedId, value, classSkill) {
+            let usedWeaponSkillpoints = parseInt($('#usedWeaponSkillpoints').val() || 0)
+            let wspl = parseInt($('#wspl').val() || 0)
+            if (usedWeaponSkillpoints + value < 0) return;
+            if (parseInt($(`input[name='${id}']`).val() || 0) + value < 0) return;
+            // NEW
+            if (parseInt($(`input[name='${combinedId}']`).val() || 0) + value > 20) return;
+            // END NEW
+            $(`input[name='${id}']`).val(parseInt($(`input[name='${id}']`).val() || 0) + value)
+            usedWeaponSkillpoints+=value;
+            $('#usedWeaponSkillpoints').val(usedWeaponSkillpoints)
             updateFormData();
         }
 
@@ -257,12 +348,18 @@
         }
 
         {
-            let maxVal = 0
-            $('.skill').each(function (index) {
+            let maxSkillVal = 0
+            $('.skillCount').each(function (index) {
                 let val = parseInt($(this).find('input').val() || 0)
-                maxVal += val;
+                maxSkillVal += val;
             })
-            $('#usedSkillpoints').val(maxVal)
+            let maxWeaponSkillVal = 0
+            $('.weaponskillCount').each(function (index) {
+                let val = parseInt($(this).find('input').val() || 0)
+                maxWeaponSkillVal += val;
+            })
+            $('#usedSkillpoints').val(maxSkillVal)
+            $('#usedWeaponSkillpoints').val(maxWeaponSkillVal)
         }
 
         selectedClassData($('#class-select'), true);

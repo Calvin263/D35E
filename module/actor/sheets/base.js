@@ -168,6 +168,14 @@ export class ActorSheetPF extends ActorSheet {
       }
     }
 
+    // Update weapon skill labels
+    for ( let [s, skl] of Object.entries(data.actor.data.weaponSkills)) {
+      skl.label = CONFIG.D35E.weaponSkills[s];
+      skl.sourceDetails = (data.sourceDetails != null && data.sourceDetails.data.skills[s] != null) ? data.sourceDetails.data.skills[s].changeBonus : [];
+      if (!data.actor.data.details.levelUpProgression && !skl.cls && skl.rank) // We do not display this as this is already calculated
+        skl.sourceDetails.push({ name: game.i18n.localize("D35E.NonClassSkill"), value: game.i18n.localize("D35E.HalfRanks") })
+    }
+
     // Update spellbook info
     for (let spellbook of Object.values(data.actor.data.attributes.spells.spellbooks)) {
       const cl = spellbook.cl.total;
@@ -214,12 +222,14 @@ export class ActorSheetPF extends ActorSheet {
 
     // Prepare skillsets
     data.skillsets = this._prepareSkillsets(data.actor.data.skills);
+    data.weaponSkillsets = this._prepareWeaponSkillsets(data.actor.data.weaponSkills);
 
     data.energyResistance = DamageTypes.computeERString(DamageTypes.getERForActor(this.actor));
     data.damageReduction = DamageTypes.computeDRString(DamageTypes.getDRForActor(this.actor));
 
     // Skill rank counting
     const skillRanks = { allowed: 0, used: 0, bgAllowed: 0, bgUsed: 0, sentToBG: 0 };
+    const weaponskillRanks = { allowed: 0, used: 0, bgAllowed: 0, bgUsed: 0, sentToBG: 0 };
     // Count used skill ranks
     for (let skl of Object.values(this.actor.data.data.skills)) {
       if (skl.subSkills != null) {
@@ -239,21 +249,36 @@ export class ActorSheetPF extends ActorSheet {
         skillRanks.used += skl.rank;
       }
     }
+
+    for (let skl of Object.values(this.actor.data.data.weaponSkills)) {
+     if (data.useBGSkills && skl.background) {
+        weaponskillRanks.bgUsed += skl.rank;
+      }
+      else {
+        weaponskillRanks.used += skl.rank;
+      }
+    }
     // Count allowed skill ranks
+    
     let firstOnList = true;
     this.actor.data.items.filter(obj => { return obj.type === "class"; }).forEach(cls => {
       const clsLevel = cls.data.levels;
       const clsSkillsPerLevel = cls.data.skillsPerLevel;
+      const clsWeaponSkillsPerLevel = cls.data.weaponskillsPerLevel;
       const fcSkills = cls.data.fc.skill.value;
+      const fcWeaponSkills = cls.data.fc.weaponSkill.value;
       if (clsLevel > 0) {
         if (firstOnList) {
           skillRanks.allowed += (Math.max(((clsLevel - 1) + 4 ) , (((this.actor.data.data.abilities.int.mod + clsSkillsPerLevel) * 3) + ((this.actor.data.data.abilities.int.mod + clsSkillsPerLevel) * clsLevel)) + fcSkills));
+          weaponskillRanks.allowed += (Math.max(((clsLevel - 1) + 4 ) , (((this.actor.data.data.abilities.int.mod + clsWeaponSkillsPerLevel) * 3) + ((this.actor.data.data.abilities.int.mod + clsWeaponSkillsPerLevel) * clsLevel)) + fcWeaponSkills));
           firstOnList = false;
         } else {
           skillRanks.allowed += (((this.actor.data.data.abilities.int.mod + clsSkillsPerLevel) * clsLevel));
+          weaponskillRanks.allowed += (((this.actor.data.data.abilities.int.mod + clsweaponSkillsPerLevel) * clsLevel));
         }
       }
       if (data.useBGSkills) skillRanks.bgAllowed = this.actor.data.data.details.level.value * 2;
+      if (data.useBGSkills) weaponskillRanks.bgAllowed = this.actor.data.data.details.level.value * 2;
     });
     if (this.actor.data.data.details.bonusSkillRankFormula !== "") {
       let roll = new Roll(
@@ -269,8 +294,15 @@ export class ActorSheetPF extends ActorSheet {
         skillRanks.allowed -= skillRanks.sentToBG;
         skillRanks.bgAllowed += skillRanks.sentToBG;
       }
+      if (weaponskillRanks.bgUsed > weaponskillRanks.bgAllowed) {
+        weaponskillRanks.sentToBG = (weaponskillRanks.bgUsed - weaponskillRanks.bgAllowed);
+        weaponskillRanks.allowed -= weaponskillRanks.sentToBG;
+        weaponskillRanks.bgAllowed += weaponskillRanks.sentToBG;
+      }
     }
     data.skillRanks = skillRanks;
+    data.weaponskillRanks = weaponskillRanks;
+    
     let sizeMod = CONFIG.D35E.sizeMods[this.actor.data.data.traits.actualSize] || 0
     data.attackBonuses = { sizeMod: sizeMod, melee: this.actor.data.data.attributes.bab.total + this.actor.data.data.abilities.str.mod + sizeMod - (this.actor.data.data.attributes.energyDrain || 0) + this.actor.data.data.attributes.attack.general + this.actor.data.data.attributes.attack.melee, ranged: this.actor.data.data.attributes.bab.total + this.actor.data.data.abilities.dex.mod + sizeMod - (this.actor.data.data.attributes.energyDrain || 0) + this.actor.data.data.attributes.attack.general + this.actor.data.data.attributes.attack.ranged}
 
@@ -409,6 +441,29 @@ export class ActorSheetPF extends ActorSheet {
       }
       if (skl.background) result.background.skills[a] = skl;
       else result.adventure.skills[a] = skl;
+    })
+
+    return result;
+  }
+
+  _prepareWeaponSkillsets(weaponSkillset) {
+    let result = {
+      all: { skills: {} },
+      known: { skills: {} }
+    };
+
+    // sort skills by label
+    let keys = Object.keys(weaponSkillset).sort(function(a,b) {
+      return ('' + weaponSkillset[a].label).localeCompare(weaponSkillset[b].label)
+    });
+
+    keys.forEach( a => {
+      let skl = weaponSkillset[a]
+      result.all.skills[a] = skl;
+      if ((skl.rank > 0 || (!skl.rt && this.actor.data.data.displayNonRTSkills) || (skl.visibility === "always")) && (skl.visibility !== "never")) result.known.skills[a] = skl;
+      else if (skl.subSkills !== undefined && (skl.visibility !== "never")) {
+        result.known.skills[a] = skl;
+      }
     })
 
     return result;
@@ -2203,7 +2258,8 @@ export class ActorSheetPF extends ActorSheet {
     const a = event.currentTarget;
     const options = {
       id: a.getAttribute("for"),
-      skillset: this._prepareSkillsets(this.getData().actor.data.skills)
+      skillset: this._prepareSkillsets(this.getData().actor.data.skills),
+      weaponSkillset: this._prepareWeaponSkillsets(this.getData().actor.data.weaponSkills)
     };
     new LevelUpDataDialog(this.actor, options).render(true);
   }

@@ -808,6 +808,17 @@ D35E.skills = {
 
 };
 
+D35E.weaponSkills = {
+  "dag": "D35E.WeaponSkillDag",
+  "mac": "D35E.WeaponSkillMac",
+  "sta": "D35E.WeaponSkillSta",
+  "cro": "D35E.WeaponSkillCro",
+  "axe": "D35E.WeaponSkillAxe",
+  "swo": "D35E.WeaponSkillSwo",
+  "pol": "D35E.WeaponSkillPol",
+  "bow": "D35E.WeaponSkillBow"
+}
+
 D35E.arbitrarySkills = [
   "art", "crf", "lor", "prf", "pro"
 ];

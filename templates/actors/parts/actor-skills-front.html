@@ -59,13 +59,17 @@
 {{/unless}}
 
 {{#unless useBGSkills}}
-<nav class="sheet-navigation tabs" data-group="skillset" style="display: none">
-  <a class="item" data-tab="all">{{ localize 'D35E.AllSkills' }}</a>
+<nav class="sheet-navigation tabs" data-group="skillset">
+  <a class="item" data-tab="skills">{{ localize 'D35E.Skills' }}</a>
+  <a class="item" data-tab="weaponSkills">{{ localize 'D35E.WeaponSkills' }}</a>
 </nav>
 
 <section class="skillset-body">
-  <div class="tab flexcol" data-group="skillset" data-tab="all">
+  <div class="tab flexcol" data-group="skillset" data-tab="skills">
     {{> "systems/D35E/templates/actors/parts/actor-skills.html" skillset=skillsets.all.skills isBackgroundSkills="false"}}
+  </div>
+  <div class="tab flexcol" data-group="skillset" data-tab="weaponSkills">
+    {{> "systems/D35E/templates/actors/parts/actor-weaponskills.html" weaponSkillset=weaponSkillsets.all.skills isBackgroundSkills="false"}}
   </div>
 </section>
 {{/unless}}

@@ -4637,8 +4637,8 @@ tr.introjs-showElement > th {
 .level-up-data ul.skills-list li.skill.flexrow div.skill-row-2 {
   position: relative;
   display: flex;
-  justify-content: flex-end;
-  margin-top: 0px;
+  justify-content: flex-start;
+  margin-top: 0;
 }
 .level-up-data ul.skills-list li.skill.flexrow div.skill-row-2 .skill-level {
   margin-right: 5px;

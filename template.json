@@ -468,6 +468,7 @@
               "class": null,
               "classImage": null,
               "skills": {},
+              "weaponSkills": {},
               "hp": 0,
               "hasFeat": true,
               "hasAbility": false
@@ -661,7 +662,79 @@
             "background": false,
             "visibility": "default"
           }
-          
+        }, "weaponSkills": {
+          "dag": {
+            "value": 0,
+            "rt": false,
+            "rank": 0,
+            "notes": "",
+            "mod": 0,
+            "background": false,
+            "visibility": "default"
+          },
+          "mac": {
+            "value": 0,
+            "rt": false,
+            "rank": 0,
+            "notes": "",
+            "mod": 0,
+            "background": false,
+            "visibility": "default"
+          },
+          "sta": {
+            "value": 0,
+            "rt": false,
+            "rank": 0,
+            "notes": "",
+            "mod": 0,
+            "background": false,
+            "visibility": "default"
+          },
+          "cro": {
+            "value": 0,
+            "rt": false,
+            "rank": 0,
+            "notes": "",
+            "mod": 0,
+            "background": false,
+            "visibility": "default"
+          },
+          "axe": {
+            "value": 0,
+            "rt": true,
+            "rank": 0,
+            "notes": "",
+            "mod": 0,
+            "background": false,
+            "visibility": "default"
+          },
+          "swo": {
+            "value": 0,
+            "rt": true,
+            "rank": 0,
+            "notes": "",
+            "mod": 0,
+            "background": false,
+            "visibility": "default"
+          },
+          "pol": {
+            "value": 0,
+            "rt": true,
+            "rank": 0,
+            "notes": "",
+            "mod": 0,
+            "background": false,
+            "visibility": "default"
+          },
+          "bow": {
+            "value": 0,
+            "rt": true,
+            "rank": 0,
+            "notes": "",
+            "mod": 0,
+            "background": false,
+            "visibility": "default"
+          }
         },
         "customSkills": {},
         "traits": {
@@ -1132,6 +1205,7 @@
       "hp": 8,
       "bab": "low",
       "skillsPerLevel": 0,
+      "weaponskillsPerLevel": 0,
       "allSpellsKnown": false,
       "creatureType": "humanoid",
       "savingThrows": {
@@ -1152,11 +1226,15 @@
         "skill": {
           "value": 0
         },
+        "weaponSkill": {
+          "value": 0
+        },
         "alt": {
           "value": 0
         }
       },
       "classSkills": {},
+      "classWeaponSkills": {},
       "nonActiveClassAbilities": []
     },
     "buff": {

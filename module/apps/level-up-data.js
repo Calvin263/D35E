@@ -61,6 +61,22 @@ export class LevelUpDataDialog extends FormApplication {
                 }
             })
         })
+        let weaponSkillset = {}
+        console.log(this.levelUpData);
+        Object.keys(this.options.weaponSkillset.all.skills).forEach(s => {
+            weaponSkillset[s] = {
+                rank: this.levelUpData.weaponSkills[s] !== undefined ? this.levelUpData.weaponSkills[s].rank : 0,
+                name: this.options.weaponSkillset.all.skills[s].name,
+                label: this.options.weaponSkillset.all.skills[s].label,
+                baseRank: this.options.weaponSkillset.all.skills[s].rank - (this.levelUpData.weaponSkills[s] !== undefined ? (this.levelUpData.weaponSkills[s].cls ? this.levelUpData.weaponSkills[s].rank : this.levelUpData.weaponSkills[s].rank/2) : 0),
+                rt: this.options.weaponSkillset.all.skills[s].rt,
+                cs: this.options.weaponSkillset.all.skills[s].cs,
+                // NEW  Level & Progression
+                level: this.options.weaponSkillset.all.skills[s].level,
+                progression: this.options.weaponSkillset.all.skills[s].progression,
+                // END NEW
+            }
+        })
         let classes = this.actor.items.filter(o => o.type === "class" && getProperty(o.data, "classType") !== "racial").sort((a, b) => {
             return a.sort - b.sort;
         })
@@ -68,10 +84,13 @@ export class LevelUpDataDialog extends FormApplication {
             actor: this.actor,
             classes: classes,
             classesJson: JSON.stringify(classes.map(_c => { return {id: _c._id, classSkills: _c.data.classSkills}})),
+            weaponClassesJson: JSON.stringify(classes.map(_c => { return {id: _c._id, classWeaponSkills: _c.data.classWeaponSkills}})),
             level: this.actor.data.details.levelUpData.findIndex(a => a.id === this.levelUpId) + 1,
             totalLevel: this.actor.data.details.level.available,
             skillset: skillset,
+            weaponSkillset: weaponSkillset,
             maxSkillRank: this.actor.data.details.level.available + 3,
+            maxWeaponSkillRank: this.actor.data.details.level.available + 3,
             levelUpData: this.levelUpData,
             bonusSkillPoints: this.actor.data?.counters?.bonusSkillPoints?.value || 0,
             config: CONFIG.D35E}
@@ -123,6 +142,13 @@ export class LevelUpDataDialog extends FormApplication {
                             a.skills[key[1]].subskills[key[3]].cls = _class.data.classSkills[key[1]]
                             a.skills[key[1]].subskills[key[3]].rank = parseInt(formData[s])
                         }
+                        if (key[0] === "weaponSkill" && key.length === 3) {
+                            if (a.weaponSkills[key[1]] === undefined) {
+                                a.weaponSkills[key[1]] = {rank: 0, cls: _class.data.classWeaponSkills[key[1]]}
+                            }
+                            a.weaponSkills[key[1]].cls = _class.data.classWeaponSkills[key[1]]
+                            a.weaponSkills[key[1]].rank = parseInt(formData[s])
+                        }
                     })
                 }
             })
@@ -154,6 +180,9 @@ export class LevelUpDataDialog extends FormApplication {
                         })
                     }
                 })
+                Object.keys(lud.weaponSkills).forEach(s => {
+                    updateData[`data.weaponSkills.${s}.rank`] = (lud.weaponSkills[s].rank || 0) * (lud.weaponSkills[s].cls ? 1 : 0.5) + (updateData[`data.weaponSkills.${s}.rank`] || 0);
+                })
             })
             Object.keys(data[0].skills).forEach(s => {
                 updateData[`data.skills.${s}.rank`] = Math.floor(updateData[`data.skills.${s}.rank`] || 0);
@@ -162,6 +191,9 @@ export class LevelUpDataDialog extends FormApplication {
                         updateData[`data.skills.${s}.subSkills.${sb}.rank`] = Math.floor(updateData[`data.skills.${s}.subSkills.${sb}.rank`] || 0);
                     })
                 }
+            })
+            Object.keys(data[0].weaponSkills).forEach(s => {
+                updateData[`data.weaponSkills.${s}.rank`] = Math.floor(updateData[`data.weaponSkills.${s}.rank`] || 0);
             })
             for (var __class of classes) {
                 if (__class.data.classType === "racial") continue;
