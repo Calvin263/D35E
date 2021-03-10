@@ -181,8 +181,8 @@
             let level = {{level}};
             let isCharacter = '{{actor.type}}' === "character";
             if (level === 1 && isCharacter) {
-                skills = skills * 4
-                weaponSkills = weaponSkills * 4
+                skills = skills * 3
+                weaponSkills = weaponSkills * 3
             }
 
             $('#spl').val(skills)
@@ -286,8 +286,8 @@
             let bonusSkillPoints = '{{bonusSkillPoints}}';
             let level = {{level}};
             if (level === 1) {
-                $('#flb').text(', {{localize "D35E.FirstLevelMultiplier"}}')
-                $('#flb2').text(', {{localize "D35E.FirstLevelMultiplier"}}')
+                $('#flb').text(' * {{localize "D35E.FirstLevelMultiplier"}}')
+                $('#flb2').text(' * {{localize "D35E.FirstLevelMultiplier"}}')
             }
             $('#skill-per-level-base').text(splBase)
             $('#skill-per-level-int').text(intSkills)

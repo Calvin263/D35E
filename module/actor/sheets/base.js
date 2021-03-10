@@ -274,7 +274,7 @@ export class ActorSheetPF extends ActorSheet {
           firstOnList = false;
         } else {
           skillRanks.allowed += (((this.actor.data.data.abilities.int.mod + clsSkillsPerLevel) * clsLevel));
-          weaponskillRanks.allowed += (((this.actor.data.data.abilities.int.mod + clsweaponSkillsPerLevel) * clsLevel));
+          weaponskillRanks.allowed += ((clsweaponSkillsPerLevel * clsLevel));
         }
       }
       if (data.useBGSkills) skillRanks.bgAllowed = this.actor.data.data.details.level.value * 2;

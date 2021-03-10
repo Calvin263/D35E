@@ -2278,6 +2278,14 @@ export class ActorPF extends Actor {
                 linkData(data, updateData, `data.skills.${k}.subSkills.${k2}.cs`, isClassSkill);
             }
         }
+        for (let [k, s] of Object.entries(getProperty(data, "data.weaponSkills"))) {
+            if (!s) continue;
+            const isClassSkill = classes.reduce((cur, o) => {
+                if ((getProperty(o, "data.classWeaponSkills") || {})[k] === true) return true;
+                return cur;
+            }, false);
+            linkData(data, updateData, `data.weaponSkills.${k}.cs`, isClassSkill);
+        }
         {
             let level = classes.reduce((cur, o) => {
                 if (o.data.classType === "minion" || o.data.classType === "template") return cur;
