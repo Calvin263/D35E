@@ -1076,13 +1076,17 @@ D35E.buffTargets = {
     "intSkills": "D35E.BuffTarIntSkills",
     "wisSkills": "D35E.BuffTarWisSkills",
     "chaSkills": "D35E.BuffTarChaSkills",
-    "perfSkills": "D35E.BuffTarPerfSkills",
-    "craftSkills": "D35E.BuffTarCraftSkills",
-    "profSkills": "D35E.BuffTarProfSkills",
     "knowSkills": "D35E.BuffTarKnowSkills",
   },
   "skill": {
     "_label": "D35E.BuffTarSpecificSkill",
+  },
+  "weaponSkills": {
+    "_label": "D35E.WeaponSkills",
+    "weaponSkills": "D35E.All"
+  },
+  "weaponSkill": {
+    "_label": "D35E.BuffTarSpecificWeaponSkill",
   },
   "abilityChecks": {
     "_label": "D35E.BuffTarAbilityChecks",
@@ -1156,6 +1160,13 @@ D35E.contextNoteTargets = {
   },
   "skill": {
     "_label": "D35E.BuffTarSpecificSkill",
+  },
+  "weaponSkills": {
+    "_label": "D35E.WeaponSkills",
+    "weaponSkills": "D35E.All"
+  },
+  "weaponSkill": {
+    "_label": "D35E.BuffTarSpecificWeaponSkill",
   },
   "abilityChecks": {
     "_label": "D35E.BuffTarAbilityChecks",

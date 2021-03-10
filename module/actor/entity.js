@@ -174,6 +174,8 @@ export class ActorPF extends Actor {
             case "chaSkills":
                 result.skills = null;
                 break;
+            case "weaponSkills":
+                result.weaponSkills = null;
             case "cmb":
                 result.attributes.cmb = null;
                 break;
@@ -194,12 +196,14 @@ export class ActorPF extends Actor {
 
     get _sortChangePriority() {
         const skillTargets = this._skillTargets;
+        const weaponSkillTargets = this._weaponSkillTargets;
         return {
             targets: [
                 "ability", "misc", "ac", "attack", "damage", "savingThrows", "skills", "skill", "prestigeCl","resistance","dr"
             ], types: [
                 "str", "dex", "con", "int", "wis", "cha",
-                "skills", "strSkills", "dexSkills", "conSkills", "intSkills", "wisSkills", "chaSkills","perfSkills","craftSkills","knowSkills", ...skillTargets,
+                "skills", "strSkills", "dexSkills", "conSkills", "intSkills", "wisSkills", "chaSkills","knowSkills", ...skillTargets,
+                "weaponSkills", ...weaponSkillTargets,
                 "allChecks", "strChecks", "dexChecks", "conChecks", "intChecks", "wisChecks", "chaChecks",
                 "allSpeeds", "landSpeed", "climbSpeed", "swimSpeed", "burrowSpeed", "flySpeed",
                 "ac", "aac", "sac", "nac","tch","ddg","pac",
@@ -228,6 +232,15 @@ export class ActorPF extends Actor {
             } else skills.push(`skill.${sklKey}`);
         }
         return [...skills, ...subSkills];
+    }
+
+    get _weaponSkillTargets() {
+        let weaponSkills = [];
+        for (let [sklKey, skl] of Object.entries(this.data.data.weaponSkills)) {
+            if (skl == null) continue;
+            else weaponSkills.push(`weaponSkill.${sklKey}`);
+        }
+        return [...weaponSkills];
     }
 
     _sortChanges(a, b) {
@@ -447,54 +460,6 @@ export class ActorPF extends Actor {
                     }
                 }
                 return result;
-            case "chaSkills":
-                for (let [a, skl] of Object.entries(curData.skills)) {
-                    if (skl == null) continue;
-                    if (skl.ability === "cha") result.push(`data.skills.${a}.changeBonus`);
-
-                    if (skl.subSkills != null) {
-                        for (let [b, subSkl] of Object.entries(skl.subSkills)) {
-                            if (subSkl != null && subSkl.ability === "cha") result.push(`data.skills.${a}.subSkills.${b}.changeBonus`);
-                        }
-                    }
-                }
-                return result;
-            case "perfSkills": {
-                let skl = curData.skills["prf"];
-                if (skl != null) {
-                    result.push(`data.skills.prf.changeBonus`);
-                    if (skl.subSkills != null) {
-                        for (let [b, subSkl] of Object.entries(skl.subSkills)) {
-                            if (subSkl != null) result.push(`data.skills.prf.subSkills.${b}.changeBonus`);
-                        }
-                    }
-                }
-                return result;
-            }
-            case "profSkills": {
-                let skl = curData.skills["pro"];
-                if (skl != null) {
-                    result.push(`data.skills.pro.changeBonus`);
-                    if (skl.subSkills != null) {
-                        for (let [b, subSkl] of Object.entries(skl.subSkills)) {
-                            if (subSkl != null) result.push(`data.skills.pro.subSkills.${b}.changeBonus`);
-                        }
-                    }
-                }
-                return result;
-            }
-            case "craftSkills": {
-                let skl = curData.skills["crf"];
-                if (skl != null) {
-                    result.push(`data.skills.crf.changeBonus`);
-                    if (skl.subSkills != null) {
-                        for (let [b, subSkl] of Object.entries(skl.subSkills)) {
-                            if (subSkl != null) result.push(`data.skills.crf.subSkills.${b}.changeBonus`);
-                        }
-                    }
-                }
-                return result;
-            }
 
             case "knowSkills": {
                 let knowledgeSkills = new Set(['kna','knh','knn','kno','kbr'])
@@ -506,6 +471,12 @@ export class ActorPF extends Actor {
                 }
                 return result;
             }
+            case "weaponSkills":
+                for (let [a, skl] of Object.entries(curData.weaponSkills)) {
+                    if (skl == null) continue;
+                    result.push(`data.weaponSkills.${a}.changeBonus`);
+                }
+                return result;
             case "allChecks":
                 return ["data.abilities.str.checkMod", "data.abilities.dex.checkMod", "data.abilities.con.checkMod",
                     "data.abilities.int.checkMod", "data.abilities.wis.checkMod", "data.abilities.cha.checkMod"];
@@ -583,6 +554,13 @@ export class ActorPF extends Actor {
             const subSklKey = RegExp.$2;
             if (curData.skills[sklKey] != null && curData.skills[sklKey].subSkills[subSklKey] != null) {
                 return `data.skills.${sklKey}.subSkills.${subSklKey}.changeBonus`;
+            }
+        }
+
+        if (changeTarget.match(/^weaponSkill\.([a-zA-Z0-9]+)$/)) {
+            const sklKey = RegExp.$1;
+            if (curData.weaponSkills[sklKey] != null) {
+                return `data.weaponSkills.${sklKey}.changeBonus`;
             }
         }
 
@@ -1341,6 +1319,15 @@ export class ActorPF extends Actor {
                             }
                         }
                     }
+                }// Add specific weapon skills as targets
+                if (key === "weaponSkill") {
+                    for (let [s, skl] of Object.entries(this.data.data.weaponSkills)) {
+                        if (skl == null) continue;
+                        changeData[`weaponSkill.${s}`] = {};
+                        Object.keys(CONFIG.D35E.bonusModifiers).forEach(b => {
+                            changeData[`weaponSkill.${s}`][b] = duplicate(changeDataTemplate);
+                        });
+                    }
                 }
                 // Add static targets
                 else {
@@ -2098,6 +2085,11 @@ export class ActorPF extends Actor {
 
         // Reset specific skill bonuses
         for (let sklKey of this._getChangeFlat("skills", "", this.data.data)) {
+            if (hasProperty(data, sklKey)) linkData(data, updateData, sklKey, 0);
+        }
+
+        // Reset specific weapon skill bonuses
+        for (let sklKey of this._getChangeFlat("weaponSkills", "", this.data.data)) {
             if (hasProperty(data, sklKey)) linkData(data, updateData, sklKey, 0);
         }
 
@@ -3123,7 +3115,7 @@ export class ActorPF extends Actor {
                 }
             }
 
-            for (let [sklKey, skl] of Object.entries(actorData.data.weaponSkills)) {
+            for (let [sklKey] of Object.entries(actorData.data.weaponSkills)) {
                 if (sourceDetails[`data.weaponSkills.${sklKey}.changeBonus`] == null) continue;
                 sourceDetails[`data.weaponSkills.${sklKey}.changeBonus`].push({
                     name: "Negative Levels",
@@ -5408,6 +5400,13 @@ export class ActorPF extends Actor {
         return null;
     }
 
+    getWeaponSkill(key) {
+        for (let [k, s] of Object.entries(this.data.data.weaponSkills)) {
+            if (k === key) return s;
+        }
+        return null;
+    }
+
     get allNotes() {
         let result = [];
 
@@ -5454,6 +5453,25 @@ export class ActorPF extends Actor {
             for (let note of result) {
                 note.notes = note.notes.filter(o => {
                     return (o[1] === "skill" && o[2] === context) || (o[1] === "skills" && (o[2] === `${ability}Skills` || o[2] === "skills"));
+                }).map(o => {
+                    return o[0];
+                });
+            }
+
+            if (skill.notes != null && skill.notes !== "") {
+                result.push({ notes: [skill.notes], item: null });
+            }
+
+            return result;
+        }
+
+        // Weapon Skill
+        if (context.match(/^weaponSkill\.(.+)/)) {
+            const skillKey = RegExp.$1;
+            const skill = this.getWeaponSkill(skillKey);
+            for (let note of result) {
+                note.notes = note.notes.filter(o => {
+                    return (o[1] === "weaponSkill" && o[2] === context) || (o[1] === "weaponSkills" && (o[2] === "weaponSkills"));
                 }).map(o => {
                     return o[0];
                 });

@@ -618,6 +618,21 @@ export class ItemSheetPF extends ItemSheet {
                         }
                     }
                 }
+                // Add specific weapon skills
+                if (item[1] === "weaponSkill") {
+                    if (this.item.actor != null) {
+                        const actorWeaponSkills = this.item.actor.data.data.weaponSkills;
+                        for (let [s, skl] of Object.entries(actorWeaponSkills)) {
+                            if (skl.custom) item.subTargets[`weaponSkill.${s}`] = skl.name;
+                            else item.subTargets[`weaponSkill.${s}`] = CONFIG.D35E.weaponSkills[s];
+                        }
+                    } else {
+                        for (let [s, skl] of Object.entries(CONFIG.D35E.weaponSkills)) {
+                            if (skl.custom) item.subTargets[`weaponSkill.${s}`] = skl.name;
+                            else item.subTargets[`weaponSkill.${s}`] = CONFIG.D35E.weaponSkills[s];
+                        }
+                    }
+                }
                 // Add static targets
                 else if (item[1] != null && CONFIG.D35E.buffTargets.hasOwnProperty(item[1])) {
                     for (let [k, v] of Object.entries(CONFIG.D35E.buffTargets[item[1]])) {
@@ -677,6 +692,20 @@ export class ItemSheetPF extends ItemSheet {
                                     item.subNotes[`skill.${s}`] = `${CONFIG.D35E.skills[s]} (${skl2.name})`;
                                 }
                             }
+                        }
+                    }
+                }
+                // Add Specific Weapon Skill
+                if (item[1] === "weaponSkill") {
+
+                    if (this.item.actor != null) {
+                        const actorWeaponSkills = this.item.actor.data.data.weaponSkills;
+                        for (let [s] of Object.entries(actorWeaponSkills)) {
+                            item.subNotes[`weaponSkill.${s}`] = CONFIG.D35E.weaponSkills[s];
+                        }
+                    } else {
+                        for (let [s] of Object.entries(CONFIG.D35E.weaponSkills)) {
+                            item.subNotes[`weaponSkill.${s}`] = CONFIG.D35E.weaponSkills[s];
                         }
                     }
                 }

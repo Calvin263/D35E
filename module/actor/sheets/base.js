@@ -150,7 +150,7 @@ export class ActorSheetPF extends ActorSheet {
         skl.sourceDetails.push({ name: game.i18n.localize("D35E.ACP"), value: `-${data.actor.data.attributes.acp.total}` })
       if (skl.ability)
         skl.sourceDetails.push({ name: game.i18n.localize("D35E.Ability"), value: getProperty(data.actor,`data.abilities.${skl.ability}.mod`) })
-      if (!data.actor.data.details.levelUpProgression && !skl.cls && skl.rank) // We do not display this as this is already calculated
+      if (/*!data.actor.data.details.levelUpProgression && */!skl.cs && skl.rank) // We do not display this as this is already calculated
         skl.sourceDetails.push({ name: game.i18n.localize("D35E.NonClassSkill"), value: game.i18n.localize("D35E.HalfRanks") })
       if (skl.subSkills != null) {
         for (let [s2, skl2] of Object.entries(skl.subSkills)) {
@@ -171,8 +171,8 @@ export class ActorSheetPF extends ActorSheet {
     // Update weapon skill labels
     for ( let [s, skl] of Object.entries(data.actor.data.weaponSkills)) {
       skl.label = CONFIG.D35E.weaponSkills[s];
-      skl.sourceDetails = (data.sourceDetails != null && data.sourceDetails.data.skills[s] != null) ? data.sourceDetails.data.skills[s].changeBonus : [];
-      if (!data.actor.data.details.levelUpProgression && !skl.cls && skl.rank) // We do not display this as this is already calculated
+      skl.sourceDetails = (data.sourceDetails != null && data.sourceDetails.data.weaponSkills[s] != null) ? data.sourceDetails.data.weaponSkills[s].changeBonus : [];
+      if (!/*data.actor.data.details.levelUpProgression && */!skl.cs && skl.rank) // We do not display this as this is already calculated
         skl.sourceDetails.push({ name: game.i18n.localize("D35E.NonClassSkill"), value: game.i18n.localize("D35E.HalfRanks") })
     }
 

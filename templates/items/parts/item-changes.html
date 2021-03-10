@@ -139,7 +139,7 @@
         <label>{{localize "D35E.ActionType"}}</label>
         <select name="data.combatChanges.{{a}}.0" style="flex: 0 0 240px">
         {{#select (lookup this "0") }}
-        {{#each ../config.combatChangeType as |name type|}}
+        {{#each ../config.combatChangeType as |name type|}} 
         <option value="{{type}}">{{localize name}}</option>
         {{/each}}
         {{/select}}
