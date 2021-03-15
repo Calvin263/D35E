@@ -838,7 +838,7 @@ D35E.spellPreparationModes = {
 
 // Weapon Types
 D35E.weaponTypes = {
-  "simple": {
+  /*"simple": {
     "_label": "D35E.WeaponTypeSimple",
     "light": "D35E.WeaponPropLight",
     "1h": "D35E.WeaponPropOneHanded",
@@ -863,7 +863,48 @@ D35E.weaponTypes = {
     "_label": "D35E.Misc",
     "splash": "D35E.WeaponTypeSplash",
     "other": "D35E.Other",
+  },*/
+  "dag": {
+    "_label": "D35E.WeaponSkillDag",
+    "light": "D35E.WeaponPropLight",
+    "1h": "D35E.WeaponPropOneHanded",
+    "2h": "D35E.WeaponPropTwoHanded",
+  },
+  "mac": {
+    "_label": "D35E.WeaponSkillMac",
+    "light": "D35E.WeaponPropLight",
+    "1h": "D35E.WeaponPropOneHanded",
+    "2h": "D35E.WeaponPropTwoHanded",
+  },
+  "sta": {
+    "_label": "D35E.WeaponSkillSta",
+    "2h": "D35E.WeaponPropTwoHanded",
+  },
+  "cro": {
+    "_label": "D35E.WeaponSkillCro",
+    "ranged": "D35E.WeaponSubtypeRanged",
+  },
+  "axe": {
+    "_label": "D35E.WeaponSkillAxe",
+    "light": "D35E.WeaponPropLight",
+    "1h": "D35E.WeaponPropOneHanded",
+    "2h": "D35E.WeaponPropTwoHanded",
+  },
+  "swo": {
+    "_label": "D35E.WeaponSkillSwo",
+    "light": "D35E.WeaponPropLight",
+    "1h": "D35E.WeaponPropOneHanded",
+    "2h": "D35E.WeaponPropTwoHanded",
+  },
+  "pol": {
+    "_label": "D35E.WeaponSkillPol",
+    "2h": "D35E.WeaponPropTwoHanded",
+  },
+  "bow": {
+    "_label": "D35E.WeaponSkillBow",
+    "ranged": "D35E.WeaponSubtypeRanged",
   }
+
 };
 
 
